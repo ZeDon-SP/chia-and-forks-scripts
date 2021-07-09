@@ -10,8 +10,7 @@ do
         #If we have an available chain, we assume all of the below is available (unless some pretty heavy fork modification, in which case... godspeed)
         blockChainPath=$(dirname "$availableChain")
         venvDir=$(find "$blockChainPath" -name "venv" -type d -maxdepth 1 | head -n 1)
-        farmerExecutable=$(find "$venvDir/bin" -name "*_farmer" -type f | head -n 1 | xargs basename)
-        chainExec=$(cut -d '_' -f 1 <<< "$farmerExecutable")
+        chainExec=$(find "$venvDir/bin" -name "*_farmer" -type f | head -n 1 | xargs basename | cut -d '_' -f 1)
         chainDaemon="${chainExec}_daemon"
         userHomePath=$(dirname "$blockChainPath")
         userOfChain=$(basename "$userHomePath")
