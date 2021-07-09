@@ -146,4 +146,6 @@ if [ "$installType" == "farmer" ]; then
         $asUser "$goVenv && echo $mnemonic | $chainCommand keys add"
         #Starts the farmer
         $asUser "$goVenv && $chainCommand start farmer"
+	#Starts the wallet so that it syncs as the blockchain db gets downloaded
+	$asUser "$goVenv && echo S | $chianCommand wallet show"
 fi
