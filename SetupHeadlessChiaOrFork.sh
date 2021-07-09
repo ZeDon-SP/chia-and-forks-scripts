@@ -147,5 +147,5 @@ if [ "$installType" == "farmer" ]; then
         #Starts the farmer
         $asUser "$goVenv && $chainCommand start farmer"
 	#Starts the wallet so that it syncs as the blockchain db gets downloaded
-	$asUser "$goVenv && echo S | $chianCommand wallet show"
+	$asUser "$goVenv && echo S | $chainCommand wallet show"
 fi
