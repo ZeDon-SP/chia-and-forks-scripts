@@ -1,10 +1,14 @@
 #!/bin/bash
 # This script checks the existance of the blockchain source into users home directories
-# If found, tries to deduce the command needed to start the farmer and starts it (killing previous daemon pid)
-# Usage: Execute from root changing {homePath} var if needed, can be added in crontab or init systems or whatever
+# If found, tries to deduce the command needed to start the chain and starts it (killing previous daemon pid)
+# Usage: Execute from root variables below if needed, can be added in crontab or init systems or whatever
 
+# EDITABLE VARIABLE #
 homePath="/home"
-availableChains=$(find "$homePath" -mindepth 3 -maxdepth 3 -name "activate" -type l)
+processToStart="farmer"
+
+# CODE BLOCK #
+availableChains=$(find "$homePath" -maxdepth 3 -name "activate" -type l)
 echo "$availableChains" | while read availableChain
 do
         #If we have an available chain, we assume all of the below is available (unless some pretty heavy fork modification, in which case... godspeed)
@@ -21,5 +25,5 @@ do
                 #Hopefully enough, else TODO: loop and wait until gone
                 sleep 10s
         fi
-        sudo su - "$userOfChain" -c "source $availableChain && $chainExec start farmer"
+        sudo su - "$userOfChain" -c "source $availableChain && $chainExec start $processToStart"
 done
