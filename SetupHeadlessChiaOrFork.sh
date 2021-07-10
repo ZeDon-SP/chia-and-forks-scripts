@@ -34,6 +34,12 @@ homePath="/home/"
 # What is a testnet?
 # If unsure, don't touch
 enableTestnet="0"
+#Backup the chain DB? If value is 1, where?
+backupDB="0"
+#Path where to backup the DB
+backupDBPath="/root/"
+#Usual name of chia and forks for blockchain DB
+dbName="blockchain_v1_mainnet.sqlite"
 
 ##########
 # FARMER #
@@ -51,13 +57,12 @@ plotsDirectory=""
 # Nothing here, yet.
 
 
-##################
-# [DO NOT TOUCH] #
+################### [DO NOT TOUCH] #
 #    DERIVED     #
 ##################
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
-
+backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
 ##################
 # [DO NOT TOUCH] #
 #    HELPERS     #
@@ -95,6 +100,14 @@ if [ ! -z "$userExist" ]; then
         userId=$(id -u "$username")
         pkill -u $userId -9
         sleep 3s
+	userHomeDir=$(eval echo "~$username")
+	if [ "$backupDB" == "1" ]; then
+		blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f)
+		if [ ! -z "$blockchainDBPath" ]; then
+			#TODO: Check for available space?
+			mv "$blockchainDBPath" "$backupDBFullPath"
+		fi
+	fi
         deluser $username
 fi
 userExist=$(cat /etc/shadow | grep $username)
