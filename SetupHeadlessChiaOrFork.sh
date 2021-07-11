@@ -12,7 +12,7 @@
 # [DO NOT TOUCH] Various helping things, DO NOT TOUCH! Unless you know what you are doing, *wink wink*
 # timelord -> Installs the timelord and starts... timelording? Uses generic new mnemonic
 # farmer -> Installs farmer and starts farming with the {plotsDirectory} value, using your mnemonic
-installType="timelord"
+installType="farmer"
 
 ##########
 # GLOBAL #
@@ -176,7 +176,9 @@ if [ "$installType" == "farmer" ]; then
 	$asUser "$goVenv && echo S | $chainCommand wallet show"
 fi
 if [ "$backupDB" == "1" ]; then
+	$asUser "$goVenv && $chainCommand stop all"
 	blockchainDBParentPath=$(basename "$blockchainDBPath")
 	mkdir -p "$blockchainDBParentPath"
 	mv "$backupDBFullPath" "$blockchainDBPath"
+	$asUser "$goVenv && $chainCommand start $installType"
 fi
