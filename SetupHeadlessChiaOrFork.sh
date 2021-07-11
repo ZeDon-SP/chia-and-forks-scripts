@@ -35,7 +35,7 @@ homePath="/home/"
 # If unsure, don't touch
 enableTestnet="0"
 #Backup the chain DB? If value is 1, where?
-backupDB="0"
+backupDB="1"
 #Path where to backup the DB
 backupDBPath="/root/"
 #Usual name of chia and forks for blockchain DB
@@ -48,7 +48,7 @@ dbName="blockchain_v1_mainnet.sqlite"
 # Your 24 words passphrase
 mnemonic=""
 # The directories you want to automatically add for start farming
-# You can insert multiple values with ("/path1" , "/path2", "/path_etc")
+# You can insert multiple values with ("/path1" "/path2" "/path_etc")
 declare -a plotsDirectories=( )
 
 ############
@@ -64,7 +64,8 @@ declare -a plotsDirectories=( )
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
-blockchainDBPath=""
+userHomeDir=$(eval echo "~$username")
+blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
 
 
 ######################
@@ -110,11 +111,8 @@ if [ ! -z "$userExist" ]; then
         userId=$(id -u "$username")
         pkill -u $userId -9
         sleep 3s
-	userHomeDir=$(eval echo "~$username")
 	if [ "$backupDB" == "1" ]; then
-		blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f)
 		if [ ! -z "$blockchainDBPath" ]; then
-			#TODO: Check for available space? Use rsync?
 			mv "$blockchainDBPath" "$backupDBFullPath"
 		fi
 	fi
@@ -166,19 +164,15 @@ if [ "$installType" == "farmer" ]; then
         #Adds plot directories to farmer
 	for plotDirectory in "${plotsDirectories[@]}"
 	do
-	        $asUser "$goVenv && $chainCommand plots add -d \"$plotsDirectory\""
+	        $asUser "$goVenv && $chainCommand plots add -d \"$plotDirectory\""
 	done
         #Adds your mnemonic keys to use for farming
         $asUser "$goVenv && echo $mnemonic | $chainCommand keys add"
         #Starts the farmer
         $asUser "$goVenv && $chainCommand start farmer"
-	#Starts the wallet so that it syncs as the blockchain db gets downloaded
-	$asUser "$goVenv && echo S | $chainCommand wallet show"
 fi
 if [ "$backupDB" == "1" ]; then
 	$asUser "$goVenv && $chainCommand stop all"
-	blockchainDBParentPath=$(basename "$blockchainDBPath")
-	mkdir -p "$blockchainDBParentPath"
 	mv "$backupDBFullPath" "$blockchainDBPath"
 	$asUser "$goVenv && $chainCommand start $installType"
 fi
