@@ -63,6 +63,7 @@ plotsDirectory=""
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
+blockchainDBPath=""
 ##################
 # [DO NOT TOUCH] #
 #    HELPERS     #
@@ -86,7 +87,7 @@ function errorHeader {
 
 userExist=$(cat /etc/shadow | grep $username)
 #TODO: Generalize for OSs without apt
-apt update && apt install wget curl python3-dev python3-venv python3-pip git bc lsb-release sudo  -y
+apt update && apt install wget curl python3-dev python3-venv python3-pip rsync git bc lsb-release sudo  -y
 
 #TODO: While loop with true and check iterations for I/O stalled processes who believe themselves to be highlanders
 if [ ! -z "$userExist" ]; then
@@ -104,7 +105,7 @@ if [ ! -z "$userExist" ]; then
 	if [ "$backupDB" == "1" ]; then
 		blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f)
 		if [ ! -z "$blockchainDBPath" ]; then
-			#TODO: Check for available space?
+			#TODO: Check for available space? Use rsync?
 			mv "$blockchainDBPath" "$backupDBFullPath"
 		fi
 	fi
@@ -161,4 +162,9 @@ if [ "$installType" == "farmer" ]; then
         $asUser "$goVenv && $chainCommand start farmer"
 	#Starts the wallet so that it syncs as the blockchain db gets downloaded
 	$asUser "$goVenv && echo S | $chainCommand wallet show"
+fi
+if [ "$backupDB" == "1" ]; then
+	blockchainDBParentPath=$(basename "$blockchainDBPath")
+	mkdir -p "$blockchainDBParentPath"
+	mv "$backupDBFullPath" "$blockchainDBPath"
 fi
