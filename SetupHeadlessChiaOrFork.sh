@@ -38,6 +38,8 @@ backupDB="1"
 backupDBPath="/root/"
 #Usual name of chia and forks for blockchain DB
 dbName="blockchain_v1_mainnet.sqlite"
+#This will force answer yes to all questions when errors arise
+forceInstall="0"
 
 ##########
 # FARMER #
@@ -102,7 +104,7 @@ apt update && apt install wget curl python3-dev python3-venv python3-pip rsync g
 if [ ! -z "$userExist" ]; then
         warningHeader
         read -p "User $username already exists! By continuing you will delete ALL of $username files, do you want to proceed? [y/N] "  -r
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if [[ ! $REPLY =~ ^[Yy]$ ]] && [ "$forceInstall" == "0" ]; then
                 echo "Oke no probs, bye bye"
                 exit
         fi
@@ -114,8 +116,11 @@ if [ ! -z "$userExist" ]; then
 		if [ ! -z "$blockchainDBPath" ] && [ -f "$blockchainDBPath" ]; then
 			mv "$blockchainDBPath" "$backupDBFullPath"
 		else
-			echo "Blockchain DB not found! Since you specified backupDB=1 the program will now terminate. Please check the DB existance!"
-			exit
+			read -p "Blockchain DB not found! Do you want to continue? [y/N]" -r
+        		if [[ ! $REPLY =~ ^[Yy]$ ]] && [ "$forceInstall" == "0" ]; then
+        		        echo "Oke no probs, bye bye"
+        		        exit
+		        fi
 		fi
 	fi
         deluser $username
