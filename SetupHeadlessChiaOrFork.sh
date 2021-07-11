@@ -66,7 +66,7 @@ folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
 userHomeDir="${homePath}/${username}"
 blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
-venvDir="${homePath}/${username}/${blockchainDBPath}/venv"
+venvDir="${homePath}/${username}/${folderChainName}/venv"
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
 
 ######################
