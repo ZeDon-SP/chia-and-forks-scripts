@@ -34,6 +34,12 @@ homePath="/home/"
 # What is a testnet?
 # If unsure, don't touch
 enableTestnet="0"
+#Backup the chain DB? If value is 1, where?
+backupDB="0"
+#Path where to backup the DB
+backupDBPath="/root/"
+#Usual name of chia and forks for blockchain DB
+dbName="blockchain_v1_mainnet.sqlite"
 
 ##########
 # FARMER #
@@ -57,7 +63,16 @@ declare -a plotsDirectories=( )
 ##################
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
-bashCommand=$(which bash)
+backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
+blockchainDBPath=""
+
+
+######################
+#   [DO NOT TOUCH]   #
+# COMMANDS DISCOVERY #
+######################
+bashCMD=$(which bash)
+
 ##################
 # [DO NOT TOUCH] #
 #    HELPERS     #
@@ -81,7 +96,7 @@ function errorHeader {
 
 userExist=$(cat /etc/shadow | grep $username)
 #TODO: Generalize for OSs without apt
-apt update && apt install wget curl python3-dev python3-venv python3-pip git bc lsb-release sudo  -y
+apt update && apt install wget curl python3-dev python3-venv python3-pip rsync git bc lsb-release sudo  -y
 
 #TODO: While loop with true and check iterations for I/O stalled processes who believe themselves to be highlanders
 if [ ! -z "$userExist" ]; then
@@ -95,6 +110,14 @@ if [ ! -z "$userExist" ]; then
         userId=$(id -u "$username")
         pkill -u $userId -9
         sleep 3s
+	userHomeDir=$(eval echo "~$username")
+	if [ "$backupDB" == "1" ]; then
+		blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f)
+		if [ ! -z "$blockchainDBPath" ]; then
+			#TODO: Check for available space? Use rsync?
+			mv "$blockchainDBPath" "$backupDBFullPath"
+		fi
+	fi
         deluser $username
 fi
 userExist=$(cat /etc/shadow | grep $username)
@@ -109,7 +132,7 @@ fi
 asUser="sudo su - $username -c "
 goVenv="cd $folderChainName && . ./activate "
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
-useradd -s "$bashCommand" -m -p "$cpassword" "$username" -b "$homePath"
+useradd -s "$bashCMD" -m -p "$cpassword" "$username" -b "$homePath"
 usermod -a -G sudo "$username"
 #Git checkout
 $asUser "git clone $gitUrl --recurse-submodules"
@@ -151,4 +174,9 @@ if [ "$installType" == "farmer" ]; then
         $asUser "$goVenv && $chainCommand start farmer"
 	#Starts the wallet so that it syncs as the blockchain db gets downloaded
 	$asUser "$goVenv && echo S | $chainCommand wallet show"
+fi
+if [ "$backupDB" == "1" ]; then
+	blockchainDBParentPath=$(basename "$blockchainDBPath")
+	mkdir -p "$blockchainDBParentPath"
+	mv "$backupDBFullPath" "$blockchainDBPath"
 fi
