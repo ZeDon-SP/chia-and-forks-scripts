@@ -102,13 +102,17 @@ apt update && apt install wget curl python3-dev python3-venv python3-pip rsync g
 
 #TODO: While loop with true and check iterations for I/O stalled processes who believe themselves to be highlanders
 if [ ! -z "$userExist" ]; then
-        warningHeader
-        read -p "User $username already exists! By continuing you will delete ALL of $username files, do you want to proceed? [y/N] "  -r
-        if [[ ! $REPLY =~ ^[Yy]$ ]] && [ "$forceInstall" == "0" ]; then
-                echo "Oke no probs, bye bye"
-                exit
-        fi
-        echo "Killing user processes before deletion.. If you see a failure it's ok, means no processes were running"
+	warningHeader
+	if [ "$forceInstall" == "1" ]; then
+		echo "User already exists! Forcing installation..."
+	else
+        	read -p "User $username already exists! By continuing you will delete ALL of $username files, do you want to proceed? [y/N] "  -r
+        	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        	        echo "Oke no probs, bye bye"
+        	        exit
+        	fi
+	fi
+        echo "Killing user processes before deletion.."
         userId=$(id -u "$username")
         pkill -u $userId -9
         sleep 3s
@@ -116,11 +120,16 @@ if [ ! -z "$userExist" ]; then
 		if [ ! -z "$blockchainDBPath" ] && [ -f "$blockchainDBPath" ]; then
 			mv "$blockchainDBPath" "$backupDBFullPath"
 		else
-			read -p "Blockchain DB not found! Do you want to continue? [y/N]" -r
-        		if [[ ! $REPLY =~ ^[Yy]$ ]] && [ "$forceInstall" == "0" ]; then
-        		        echo "Oke no probs, bye bye"
-        		        exit
-		        fi
+			warningHeader
+			if  [ "$forceInstall" != "1" ]; then
+				echo "Blockchain DB not found! Forcing installation..."
+			else
+				read -p "Blockchain DB not found! Do you want to continue? [y/N]" -r
+	        		if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+	        		        echo "Oke no probs, bye bye"
+	        		        exit
+			        fi
+			fi
 		fi
 	fi
         deluser $username
