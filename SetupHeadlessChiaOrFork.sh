@@ -140,10 +140,10 @@ useradd -s "$bashCMD" -m -p "$cpassword" "$username" -b "$homePath"
 usermod -a -G sudo "$username"
 #Git checkout
 $asUser "git clone $gitUrl --recurse-submodules"
-#Finds the chain command in the venv of the install dir
-chainCommand=$(find "$venvDir/bin" -name "*_farmer" -type f | head -n 1 | xargs basename | cut -d '_' -f 1)
 #Base Installation
 $asUser "cd $folderChainName && sed -i \"s#sudo#sudo -S#g\" install.sh && echo \"$password\" | sh install.sh"
+#Finds the chain command in the venv of the install dir
+chainCommand=$(find "$venvDir/bin" -name "*_farmer" -type f | head -n 1 | xargs basename | cut -d '_' -f 1)
 
 #Configuration based on install type
 if [ "$installType" == "timelord" ]; then
