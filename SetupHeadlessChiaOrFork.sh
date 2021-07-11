@@ -41,9 +41,9 @@ enableTestnet="0"
 
 # Your 24 words passphrase
 mnemonic=""
-# The directory you want to automatically add for start farming
-# TODO: Allow multiple values
-plotsDirectory=""
+# The directories you want to automatically add for start farming
+# You can insert multiple values with ("/path1" , "/path2", "/path_etc")
+declare -a plotsDirectories=( )
 
 ############
 # TIMELORD #
@@ -140,8 +140,11 @@ if [ "$installType" == "farmer" ]; then
         if [ "$enableTestnet" == "1" ]; then
                 $asUser "$goVenv && $chainCommand configure -t t"
         fi
-        #Adds plot directory to farmer
-        $asUser "$goVenv && $chainCommand plots add -d \"$plotsDirectory\""
+        #Adds plot directories to farmer
+	for plotDirectory in "${plotsDirectories[@]}"
+	do
+	        $asUser "$goVenv && $chainCommand plots add -d \"$plotsDirectory\""
+	done
         #Adds your mnemonic keys to use for farming
         $asUser "$goVenv && echo $mnemonic | $chainCommand keys add"
         #Starts the farmer
