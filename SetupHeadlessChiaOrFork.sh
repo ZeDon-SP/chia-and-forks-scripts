@@ -62,7 +62,7 @@ declare -a plotsDirectories=( )
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
-userHomeDir=$(eval echo "~$username")
+userHomeDir="${homePath}/${username}"
 blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
 venvDir="${homePath}/${username}/${blockchainDBPath}/venv"
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
@@ -111,8 +111,11 @@ if [ ! -z "$userExist" ]; then
         pkill -u $userId -9
         sleep 3s
 	if [ "$backupDB" == "1" ]; then
-		if [ ! -z "$blockchainDBPath" ]; then
+		if [ ! -z "$blockchainDBPath" ] && [ -f "$blockchainDBPath" ]; then
 			mv "$blockchainDBPath" "$backupDBFullPath"
+		else
+			echo "Blockchain DB not found! Since you specified backupDB=1 the program will now terminate. Please check the DB existance!"
+			exit
 		fi
 	fi
         deluser $username
