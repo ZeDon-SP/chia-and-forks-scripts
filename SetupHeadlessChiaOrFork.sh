@@ -25,8 +25,6 @@ username=""
 password=""
 # E.G. https://github.com/Chia-Network/chia-blockchain
 gitUrl=""
-# E.G. chia uses command 'chia' to run ... commands...
-chainCommand=""
 # The path where you want your user home directory to be
 # If unsure, don't touch
 homePath="/home/"
@@ -66,7 +64,8 @@ folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
 userHomeDir=$(eval echo "~$username")
 blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
-
+venvDir="${homePath}/${username}/${blockchainDBPath}/venv"
+cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
 
 ######################
 #   [DO NOT TOUCH]   #
@@ -129,11 +128,12 @@ if [ -d "$homePath/$username" ]; then
 fi
 asUser="sudo su - $username -c "
 goVenv="cd $folderChainName && . ./activate "
-cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
 useradd -s "$bashCMD" -m -p "$cpassword" "$username" -b "$homePath"
 usermod -a -G sudo "$username"
 #Git checkout
 $asUser "git clone $gitUrl --recurse-submodules"
+#Finds the chain command in the venv of the install dir
+chainCommand=$(find "$venvDir/bin" -name "*_farmer" -type f | head -n 1 | xargs basename | cut -d '_' -f 1)
 #Base Installation
 $asUser "cd $folderChainName && sed -i \"s#sudo#sudo -S#g\" install.sh && echo \"$password\" | sh install.sh"
 
