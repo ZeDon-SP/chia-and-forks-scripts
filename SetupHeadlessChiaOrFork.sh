@@ -57,7 +57,7 @@ plotsDirectory=""
 ##################
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
-
+bashCommand=$(which bash)
 ##################
 # [DO NOT TOUCH] #
 #    HELPERS     #
@@ -109,7 +109,7 @@ fi
 asUser="sudo su - $username -c "
 goVenv="cd $folderChainName && . ./activate "
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
-useradd -s "/usr/bin/bash" -m -p "$cpassword" "$username" -b "$homePath"
+useradd -s "$bashCommand" -m -p "$cpassword" "$username" -b "$homePath"
 usermod -a -G sudo "$username"
 #Git checkout
 $asUser "git clone $gitUrl --recurse-submodules"
