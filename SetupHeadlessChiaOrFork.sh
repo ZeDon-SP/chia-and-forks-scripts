@@ -79,12 +79,6 @@ fi
 if [ ! -z "$1" ]; then
 	gitUrl="$1"
 fi
-# E.G. chia-blockchain, derives from gitUrl
-folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
-backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
-userHomeDir="${homePath}/${username}"
-blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
-venvDir="${homePath}/${username}/${folderChainName}/venv"
 # Gets username if not assigned
 if [ -z "$username" ]; then
 	username=$(echo "$folderChainName" | cut -d '-' -f 1 )
@@ -93,6 +87,12 @@ fi
 if [ -z "$password" ]; then
 	password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 fi
+# E.G. chia-blockchain, derives from gitUrl
+folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
+backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
+userHomeDir="${homePath}/${username}"
+blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
+venvDir="${homePath}/${username}/${folderChainName}/venv"
 # Makes the password compatible with tools to add user to system
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
 ######################
