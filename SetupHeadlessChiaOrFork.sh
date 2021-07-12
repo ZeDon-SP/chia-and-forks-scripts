@@ -14,12 +14,17 @@
 # timelord -> Installs the timelord and starts... timelording? Uses generic new mnemonic
 # farmer -> Installs farmer and starts farming with the {plotsDirectory} value, using your mnemonic
 installType="farmer"
-
+if [ ! -z "$2" ]; then
+	installType="$2"
+fi
 ##########
 # GLOBAL #
 ##########
 # E.G. https://github.com/Chia-Network/chia-blockchain
 gitUrl=""
+if [ ! -z "$1" ]; then
+	gitUrl="$1"
+fi
 # The path where you want your user home directory to be
 # If unsure, don't touch
 homePath="/home/"
