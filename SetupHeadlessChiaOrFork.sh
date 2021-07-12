@@ -13,18 +13,17 @@
 # [DO NOT TOUCH] Various helping things, DO NOT TOUCH! Unless you know what you are doing, *wink wink*
 # timelord -> Installs the timelord and starts... timelording? Uses generic new mnemonic
 # farmer -> Installs farmer and starts farming with the {plotsDirectory} value, using your mnemonic
-installType="farmer"
-if [ ! -z "$2" ]; then
-	installType="$2"
-fi
+
+# NOTE #
+# Variables [gitUrl] and [installType] can be overridden via invoking the bash script with parameters
+# E.G. bash Script.sh "https://github.com/Chia-Network/chia-blockchain" "timelord"
+
 ##########
 # GLOBAL #
 ##########
+installType="farmer"
 # E.G. https://github.com/Chia-Network/chia-blockchain
 gitUrl=""
-if [ ! -z "$1" ]; then
-	gitUrl="$1"
-fi
 # The path where you want your user home directory to be
 # If unsure, don't touch
 homePath="/home/"
@@ -79,15 +78,23 @@ backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
 userHomeDir="${homePath}/${username}"
 blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
 venvDir="${homePath}/${username}/${folderChainName}/venv"
+# Gets username if not assigned
 if [ -z "$username" ]; then
 	username=$(echo "$folderChainName" | cut -d '-' -f 1 )
 fi
-
+# Gets password if not assigned
 if [ -z "$password" ]; then
 	password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 fi
+# Makes the password compatible with tools to add user to system
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
-
+# Check variables passed to script and overrides assignments
+if [ ! -z "$2" ]; then
+        installType="$2"
+fi
+if [ ! -z "$1" ]; then
+	gitUrl="$1"
+fi
 ######################
 #   [DO NOT TOUCH]   #
 # COMMANDS DISCOVERY #
