@@ -7,6 +7,7 @@
 
 # PLEASE READ SECTION EXPLANATIONS:
 # GLOBAL are values that MUST be filled.
+# OPTIONAL are optional values
 # FARMER are values that must be filled if your installType is 'farmer'
 # TIMELORD are values that must be filled if your installType is 'timelord'
 # [DO NOT TOUCH] Various helping things, DO NOT TOUCH! Unless you know what you are doing, *wink wink*
@@ -17,12 +18,6 @@ installType="farmer"
 ##########
 # GLOBAL #
 ##########
-# The username you want to use to create the user that will setup and run the blockchain fork
-# WARNING: This user will DELETED if exists [perform clean install]
-# DO NOT USE YOUR MAIN USER!!!!!
-username=""
-# The password tied to the username
-password=""
 # E.G. https://github.com/Chia-Network/chia-blockchain
 gitUrl=""
 # The path where you want your user home directory to be
@@ -40,6 +35,18 @@ backupDBPath="/root/"
 dbName="blockchain_v1_mainnet.sqlite"
 #This will force answer yes to all questions when errors arise
 forceInstall="0"
+
+############
+# OPTIONAL #
+############
+# The username you want to use to create the user that will setup and run the blockchain fork
+# WARNING: This user will DELETED if exists [perform clean install]
+# DO NOT USE YOUR MAIN USER!!!!!
+# IF EMPTY IS DERIVED FROM BLOCKCHAIN NAME OF GIT URL
+username=""
+# The password tied to the username
+# IF EMPTY IS USED A RANDOM 32 CHAR PASS LENGTH
+password=""
 
 ##########
 # FARMER #
@@ -67,6 +74,13 @@ backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
 userHomeDir="${homePath}/${username}"
 blockchainDBPath=$(find "$userHomeDir" -name "$dbName" -type f | head -n 1)
 venvDir="${homePath}/${username}/${folderChainName}/venv"
+if [ -z "$username" ]; then
+	username=$(echo "$folderChainName" | cut -d '-' -f 1 )
+fi
+
+if [ -z "$password" ]; then
+	password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+fi
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
 
 ######################
