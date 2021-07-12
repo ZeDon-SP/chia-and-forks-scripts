@@ -72,6 +72,13 @@ declare -a plotsDirectories=( )
 # [DO NOT TOUCH] #
 #    DERIVED     #
 ##################
+# Check variables passed to script and overrides assignments
+if [ ! -z "$2" ]; then
+        installType="$2"
+fi
+if [ ! -z "$1" ]; then
+	gitUrl="$1"
+fi
 # E.G. chia-blockchain, derives from gitUrl
 folderChainName=$(echo "${gitUrl##*/}" | sed "s#.git##g")
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
@@ -88,13 +95,6 @@ if [ -z "$password" ]; then
 fi
 # Makes the password compatible with tools to add user to system
 cpassword=$(perl -e "print crypt(\"$password\", \"salt\"),\"\n\"")
-# Check variables passed to script and overrides assignments
-if [ ! -z "$2" ]; then
-        installType="$2"
-fi
-if [ ! -z "$1" ]; then
-	gitUrl="$1"
-fi
 ######################
 #   [DO NOT TOUCH]   #
 # COMMANDS DISCOVERY #
