@@ -87,7 +87,7 @@ if [ -z "$username" ]; then
 fi
 # Gets password if not assigned
 if [ -z "$password" ]; then
-	password=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+	password=$(openssl rand -base64 32)
 fi
 backupDBFullPath="${backupDBPath}/${dbName}_$chainCommand"
 userHomeDir="${homePath}/${username}"
